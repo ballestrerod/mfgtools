@@ -1,0 +1,29 @@
+uuu_version 1.2.39
+
+# @_flash.bin            | bootloader
+# @_image   [_flash.bin] | image burn to emmc, default is the same as bootloader
+
+# This command will be run when i.MX6/7 i.MX8MM, i.MX8MQ
+SDP: boot -f _uboot.bin
+
+# These commands will be run when use SPL and will be skipped if no spl
+# SDPU will be deprecated. please use SDPV instead of SDPU
+# {
+SDPU: delay 1000
+SDPU: write -f _uboot.bin -offset 0x57c00
+SDPU: jump
+# }
+
+FB: ucmd setenv fastboot_dev mmc
+FB: ucmd setenv emmc_dev 0
+FB: ucmd setenv mmcdev ${emmc_dev}
+FB: ucmd mmc dev ${emmc_dev}
+FB: flash -raw2sparse all _rootfs.sdcard
+
+#FB: flash bootloader bootloader
+
+#FB: ucmd if env exists emmc_ack; then ; else setenv emmc_ack 0; fi;
+#FB: ucmd mmc partconf ${emmc_dev} ${emmc_ack} 0 0
+
+FB: Done
+

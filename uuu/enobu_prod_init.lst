@@ -1,0 +1,33 @@
+uuu_version 1.2.39
+
+# @_flash.bin            | bootloader
+# @_image   [_flash.bin] | image burn to emmc, default is the same as bootloader
+
+# This command will be run when i.MX6/7 i.MX8MM, i.MX8MQ
+SDP: boot -f _flash.bin
+
+SDPU: delay 1000
+SDPU: write -f _flash.bin -offset 0x57c00
+SDPU: jump
+
+# Fastboot on uboot
+FB: ucmd setenv fastboot_buffer 0x40480000
+FB: download -f _enobu.dtb
+
+FB: ucmd setenv fastboot_buffer 0x404a0000
+#FB: download -f _enobu_loader
+FB: download -f Image
+
+FB: ucmd setenv fastboot_buffer 0x444a0000
+FB: download -f _enobu_initramfs 
+
+FB: ucmd setenv bootargs console=${console},${baudrate} rdinit=/linuxrc clk_ignore_unused
+FB: acmd booti 0x404a0000 0x444a0000 0x40480000
+
+# kernel
+FBK: ucp rootfs.tar.gz T:/opt/images/enobu
+FBK: sync
+FBK: acmd source /opt/images/enobu/enobu_install_yocto.sh
+FBK: sync
+FBK: done
+
